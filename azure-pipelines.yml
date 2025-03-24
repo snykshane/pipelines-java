@@ -20,25 +20,3 @@ steps:
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
-
-- task: SnykSecurityScan@1 # or the latest version
-  inputs:
-    serviceConnectionEndpoint: 'YourSnykServiceConnection' # Replace with your Snyk service connection name
-    testType: 'app' # Or 'container', 'iac', etc. based on your project.
-    targetFile: 'pom.xml' # Or the relevant file for your project.
-    monitorWhen: 'never' # or 'always', 'vulns' depending on your needs. Only monitor when new vulnerabilities are found.
-    failOnIssues: true # Set to false if you want to continue the pipeline even with vulnerabilities.
-    outputFormat: 'json' # Use JSON for easier processing.
-    outputFile: 'snyk-results.json'
-
-- script: |
-    echo "<pre>" > snyk-report.html
-    echo "<h1>Snyk Vulnerability Report</h1>" >> snyk-report.html
-    echo "<ul>" >> snyk-report.html
-    jq -r '.vulnerabilities[] | "<li>Severity: \(.severity), Package: \(.package), Title: \(.title)</li>"' snyk-results.json >> snyk-report.html
-    echo "</ul>" >> snyk-report.html
-    echo "</pre>" >> snyk-report.html
-  displayName: 'Generate HTML Report'
-
-- publish: snyk-report.html
-  artifact: SnykReport
